@@ -65,8 +65,7 @@ router.get('/listGateways', async (req, res) => {
 router.get('/findGatewayByName', async (req, res) => {
     try {
         const { gatewayName } = req.body;
-        console.log(gatewayName,"paymentName")
-        const findGateway = await paymentMode.findOne({ gatewayName:gatewayName });
+        const findGateway = await paymentMode.findOne({ gatewayName: gatewayName });
         if (findGateway) {
             res.status(200).send({
                 message: 'Payment mode found',
@@ -87,22 +86,22 @@ router.get('/findGatewayByName', async (req, res) => {
 
 //Get UpiId
 router.get("/getUpiId", async (req, res) => {
-	try {
-		const findUpi = await UPI_ID.findOne(
-			{ is_Active: true }
-		);
-        if(findUpi){
+    try {
+        const findUpi = await UPI_ID.findOne(
+            { is_Active: true }
+        );
+        if (findUpi) {
             res.status(200).send({
                 message: 'Upi Id show successfully',
                 data: findUpi
             });
-        }else{
+        } else {
             res.status(200).send({
                 message: 'No Upi Is Active',
                 data: []
             });
         }
-	} catch (error) {
+    } catch (error) {
         res.status(500).send({
             message: 'Something went wrong',
             error: error.message
@@ -121,15 +120,15 @@ router.post("/addPaymentMode", async (req, res) => {
             });
         }
         // Check if any UPI ID is already active only when enabling a new one
-		if (paymentStatus == true) {
-			const findActiveUpi = await UPI_ID.findOne({ is_Active: true });
-			if (findActiveUpi) {
-				return res.json({
-					status: 0,
-					message: "Another UPI ID is already active. Please deactivate it first.",
-				});
-			}
-		}
+        if (paymentStatus == true) {
+            const findActiveUpi = await UPI_ID.findOne({ is_Active: true });
+            if (findActiveUpi) {
+                return res.json({
+                    status: 0,
+                    message: "Another UPI ID is already active. Please deactivate it first.",
+                });
+            }
+        }
         const payment = new PaymentModes({
             paymentMode: paymentMode,
             status: paymentStatus
@@ -161,7 +160,7 @@ router.put("/updatePaymentMode/:id", async (req, res) => {
             });
         }
 
-        const findMode = await PaymentModes.findOne({ _id: id }); 
+        const findMode = await PaymentModes.findOne({ _id: id });
         if (!findMode) {
             res.status(404).send({
                 statusCode: 404,
@@ -188,11 +187,18 @@ router.put("/updatePaymentMode/:id", async (req, res) => {
 //Get all payment Mode
 router.get("/getPaymentMode", async (req, res) => {
     try {
-        let payMentDetails = await PaymentModes.find();
+        let payMentDetails = await PaymentModes.findOne({ status: "active" });
+        let data = {
+            payMentDetails
+        }
+        if (payMentDetails.paymentMode.toUpperCase() === "UPI") {
+            let marchangeDetails = await UPI_ID.findOne({ is_Active: true });
+            data.marchangeDetails = marchangeDetails
+        }
         res.status(200).send({
             statusCode: 200,
             message: "payment mode details show successfully",
-            data: payMentDetails,
+            data,
         });
     } catch (error) {
         res.status(500).send({
