@@ -65,7 +65,6 @@ router.get('/listGateways', async (req, res) => {
 router.get('/findGatewayByName', async (req, res) => {
     try {
         const { gatewayName } = req.body;
-        console.log(gatewayName, "paymentName")
         const findGateway = await paymentMode.findOne({ gatewayName: gatewayName });
         if (findGateway) {
             res.status(200).send({
